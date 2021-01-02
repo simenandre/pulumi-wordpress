@@ -1,1 +1,1 @@
-# wordpress-setup
+![Pulumi Wordpress](./.github/assets/pulumi-wordpress.svg)
