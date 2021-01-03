@@ -1,0 +1,12 @@
+{
+    "name": "simple-project",
+    "devDependencies": {
+        "@types/node": "^10.0.0"
+    },
+    "dependencies": {
+        "@pulumi/docker": "^2.5.0",
+        "@pulumi/gcp": "^4.0.0",
+        "@pulumi/pulumi": "^2.0.0",
+        "pulumi-wordpress": "file:../../"
+    }
+}
