@@ -51,3 +51,6 @@ The goal is to provide a package/template which installs, updates and
 orchestrates one WordPress installation running on Google Cloud. It should
 automatically update on every minor version, and should be easily configured
 with a standardized configuration file.
+
+[docs]: ./docs
+[pulumi]: https://pulumi.com/
