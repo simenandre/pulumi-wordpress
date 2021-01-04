@@ -151,6 +151,10 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
                     value: pulumi.interpolate`localhost:/cloudsql/${this.database.instance.connectionName}`,
                   },
                   {
+                    name: 'DATABASE_URL',
+                    value: pulumi.interpolate`localhost:/cloudsql/${this.database.instance.connectionName}`,
+                  },
+                  {
                     name: 'WORDPRESS_DB_NAME',
                     value: this.database.database.name,
                   },
