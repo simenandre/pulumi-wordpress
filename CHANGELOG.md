@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/cobraz/pulumi-wordpress/compare/v1.1.0...v1.2.0) (2021-01-04)
+
+
+### Bug Fixes
+
+* Add DSN for Bedrock ([cc2b85a](https://github.com/cobraz/pulumi-wordpress/commit/cc2b85a7cd7bbc67152879041f1fff624560599c))
+
+
+### Features
+
+* Add ENV according to Bedrock ([ecdedea](https://github.com/cobraz/pulumi-wordpress/commit/ecdedea3f695cda4b494ac4ad106fcbaa365d3c9))
+
 # [1.1.0](https://github.com/cobraz/pulumi-wordpress/compare/v1.0.0...v1.1.0) (2021-01-04)
 
 
