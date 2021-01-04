@@ -122,6 +122,11 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
       value: keys[i].result,
     }));
 
+    const bedrockKeyEnvs = keysTypes.map((k, i) => ({
+      name: k,
+      value: keys[i].result,
+    }));
+
     this.cloudRunService = new gcp.cloudrun.Service(
       name,
       {
@@ -175,6 +180,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
                     value: config.wordpressDebug ? '1' : '',
                   },
                   ...keyEnvs,
+                  ...bedrockKeyEnvs,
                 ],
               },
             ],
