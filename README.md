@@ -28,8 +28,8 @@ export const build = new pw.GCRDocker('test', {
   build: '.'
 }, { provider });
 
-// This components includes a MySQL (Cloud SQL) instance (and all dependencies)
-// and a Cloud Run setup, and a Storage Bucket.
+// This components includes a MySQL (Cloud SQL), Cloud Run with the defined
+// image and a Storage Bucket.
 new pw.CloudRunWordpress(
   'test',
   {
