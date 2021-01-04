@@ -109,7 +109,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
       'LOGGED_IN_SALT',
       'NONCE_SALT',
     ];
-    
+
     const keys = keysTypes.map(
       k =>
         new random.RandomPassword(k, {
@@ -152,7 +152,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
                   },
                   {
                     name: 'DATABASE_URL',
-                    value: pulumi.interpolate`localhost:/cloudsql/${this.database.instance.connectionName}`,
+                    value: pulumi.interpolate`mysql:dbname=${this.database.database.name};unix_socket=/cloudsql/${this.database.instance.connectionName}`,
                   },
                   {
                     name: 'WORDPRESS_DB_NAME',
