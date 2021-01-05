@@ -6,6 +6,10 @@
 
 ### Modules
 
+* [components](modules/components.md)
+* [components/api-services](modules/components_api_services.md)
+* [components/cloud-run-wordpress](modules/components_cloud_run_wordpress.md)
+* [components/gcr-docker](modules/components_gcr_docker.md)
+* [components/service-account](modules/components_service_account.md)
+* [components/sql](modules/components_sql.md)
 * [index](modules/index.md)
-* [providers/gcp/pulumi-wordpress-gcp](modules/providers_gcp_pulumi_wordpress_gcp.md)
-* [pulumi-wordpress](modules/pulumi_wordpress.md)
