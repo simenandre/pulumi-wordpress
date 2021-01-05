@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/cobraz/pulumi-wordpress/compare/v1.2.0...v1.3.0) (2021-01-05)
+
+
+### Features
+
+* Service Account component ([0a817bc](https://github.com/cobraz/pulumi-wordpress/commit/0a817bc7c89701dcb533b89a48374e28c6c3e750))
+
 # [1.2.0](https://github.com/cobraz/pulumi-wordpress/compare/v1.1.0...v1.2.0) (2021-01-04)
 
 
