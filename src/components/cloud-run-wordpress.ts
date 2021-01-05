@@ -22,11 +22,6 @@ export interface CloudRunWordpressConfig {
   readonly databaseDiskSize?: pulumi.Input<number>;
 
   /**
-   * Turn on Wordpress Debug
-   */
-  readonly wordpressDebug?: pulumi.Input<boolean>;
-
-  /**
    * For Bedrock
    * Domain environment
    */
@@ -43,6 +38,14 @@ export interface CloudRunWordpressConfig {
    */
   readonly envs?: pulumi.Input<gcp.types.input.cloudrun.ServiceTemplateSpecContainerEnv>[];
 }
+
+const escapeName = (name: string) => {
+  name = name.replace(/[^\w\*]/g, '').toLowerCase();
+  if (name.length < 8) {
+    name = `${name}wordpress`;
+  }
+  return name.substring(0, 28);
+};
 
 export class CloudRunWordpress extends pulumi.ComponentResource {
   readonly service: gcp.cloudrun.Service;
@@ -81,16 +84,10 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
       { parent: this },
     );
 
-    const serviceAccountName = new random.RandomString(
-      name,
-      { length: 10, special: false, upper: false, number: false },
-      { parent: this },
-    );
-
     this.serviceAccount = new ServiceAccount(
       name,
       {
-        accountId: serviceAccountName.result,
+        accountId: escapeName(name),
         roles: ['roles/cloudsql.client'],
       },
       { parent: this },
