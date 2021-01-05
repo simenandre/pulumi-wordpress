@@ -25,6 +25,23 @@ export interface CloudRunWordpressConfig {
    * Turn on Wordpress Debug
    */
   readonly wordpressDebug?: pulumi.Input<boolean>;
+
+  /**
+   * For Bedrock
+   * Domain environment
+   */
+  readonly wpHome?: pulumi.Input<string>;
+
+  /**
+   * For Bedrock
+   * Domain environment
+   */
+  readonly wpSiteUrl?: pulumi.Input<string>;
+
+  /**
+   * Extra environment variables
+   */
+  readonly envs?: pulumi.Input<gcp.types.input.cloudrun.ServiceTemplateSpecContainerEnv>[];
 }
 
 export class CloudRunWordpress extends pulumi.ComponentResource {
@@ -35,8 +52,6 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
   readonly storageBucketIamMember: gcp.storage.BucketIAMMember[];
   readonly serviceAccount: ServiceAccount;
 
-  private api_services = ['compute.googleapis.com', 'sqladmin.googleapis.com'];
-
   constructor(
     name: string,
     args: CloudRunWordpressConfig,
@@ -44,8 +59,9 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
   ) {
     super('wordpress:cloudrun', name, {}, opts);
 
-    const config: CloudRunWordpressConfig = {
+    let { envs, ...config }: CloudRunWordpressConfig = {
       databaseDiskSize: 10,
+      envs: [],
       ...args,
     };
 
@@ -119,15 +135,54 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
         }),
     );
 
-    const keyEnvs = keysTypes.map((k, i) => ({
-      name: `WORDPRESS_${k}`,
-      value: keys[i].result,
-    }));
+    const keyEnvs = (prefix: string) =>
+      keysTypes.map((k, i) => ({
+        name: `${prefix}${k}`,
+        value: keys[i].result,
+      }));
 
-    const bedrockKeyEnvs = keysTypes.map((k, i) => ({
-      name: k,
-      value: keys[i].result,
-    }));
+    const authEnvs = (prefix: string) => [
+      {
+        name: `${prefix}DB_HOST`,
+        value: pulumi.interpolate`localhost:/cloudsql/${this.database.instance.connectionName}`,
+      },
+      {
+        name: `${prefix}DB_NAME`,
+        value: this.database.database.name,
+      },
+      {
+        name: `${prefix}DB_USER`,
+        value: this.database.user.name,
+      },
+      {
+        name: `${prefix}DB_PASSWORD`,
+        value: this.database.user.password,
+      },
+    ];
+
+    envs = [
+      // For vanilla Wordpress
+      ...keyEnvs('WORDPRESS_'),
+      ...authEnvs('WORDPRESS_'),
+      // For Bedrock Wordpress
+      ...keyEnvs(''),
+      ...authEnvs(''),
+      // For vanilla Wordpress
+      ...envs,
+    ];
+
+    if (config.wpHome) {
+      envs.push({
+        name: 'WP_HOME',
+        value: config.wpHome,
+      });
+    }
+    if (config.wpSiteUrl) {
+      envs.push({
+        name: 'WP_SITEURL',
+        value: config.wpSiteUrl,
+      });
+    }
 
     this.service = new gcp.cloudrun.Service(
       name,
@@ -155,35 +210,14 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
                     value: this.storageBucket.name,
                   },
                   {
-                    name: 'WORDPRESS_DB_HOST',
-                    value: pulumi.interpolate`localhost:/cloudsql/${this.database.instance.connectionName}`,
-                  },
-                  {
-                    name: 'DATABASE_URL',
-                    value: pulumi.interpolate`mysql:dbname=${this.database.database.name};unix_socket=/cloudsql/${this.database.instance.connectionName}`,
-                  },
-                  {
-                    name: 'WORDPRESS_DB_NAME',
-                    value: this.database.database.name,
-                  },
-                  {
-                    name: 'WORDPRESS_DB_USER',
-                    value: this.database.user.name,
-                  },
-                  {
-                    name: 'WORDPRESS_DB_PASSWORD',
-                    value: this.database.user.password,
+                    name: 'GCP_SERVICE_ACCOUNT',
+                    value: this.serviceAccount.key.privateKey,
                   },
                   {
                     name: 'CLOUDSQL_INSTANCE',
                     value: this.database.instance.connectionName,
                   },
-                  {
-                    name: 'WORDPRESS_DEBUG',
-                    value: config.wordpressDebug ? '1' : '',
-                  },
-                  ...keyEnvs,
-                  ...bedrockKeyEnvs,
+                  ...envs,
                 ],
               },
             ],
