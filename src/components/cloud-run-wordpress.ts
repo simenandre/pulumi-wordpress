@@ -2,6 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as random from '@pulumi/random';
 import * as gcp from '@pulumi/gcp';
 import { MySQLComponent } from './sql';
+import { ServiceAccount } from './service-account';
 
 export interface CloudRunWordpressConfig {
   /**
@@ -27,12 +28,12 @@ export interface CloudRunWordpressConfig {
 }
 
 export class CloudRunWordpress extends pulumi.ComponentResource {
-  readonly projectServices: gcp.projects.Service[];
-  readonly cloudRunService: gcp.cloudrun.Service;
+  readonly service: gcp.cloudrun.Service;
   readonly database: MySQLComponent;
   readonly cloudRunIamMember: gcp.cloudrun.IamMember;
   readonly storageBucket: gcp.storage.Bucket;
   readonly storageBucketIamMember: gcp.storage.BucketIAMMember[];
+  readonly serviceAccount: ServiceAccount;
 
   private api_services = ['compute.googleapis.com', 'sqladmin.googleapis.com'];
 
@@ -47,18 +48,6 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
       databaseDiskSize: 10,
       ...args,
     };
-
-    this.projectServices = this.api_services.map(
-      service =>
-        new gcp.projects.Service(
-          `${name}-${service}`,
-          {
-            service,
-            disableOnDestroy: false,
-          },
-          { parent: this },
-        ),
-    );
 
     this.database = new MySQLComponent(name, {}, { parent: this });
 
@@ -76,7 +65,20 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
       { parent: this },
     );
 
-    const defServiceAccount = gcp.compute.getDefaultServiceAccount({});
+    const serviceAccountName = new random.RandomString(
+      name,
+      { length: 10, special: false, upper: false, number: false },
+      { parent: this },
+    );
+
+    this.serviceAccount = new ServiceAccount(
+      name,
+      {
+        accountId: serviceAccountName.result,
+        roles: ['roles/cloudsql.client'],
+      },
+      { parent: this },
+    );
 
     this.storageBucketIamMember = [
       new gcp.storage.BucketIAMMember(
@@ -92,7 +94,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
         `${name}-service`,
         {
           bucket: this.storageBucket.name,
-          member: defServiceAccount.then(d => `serviceAccount:${d.email}`),
+          member: this.serviceAccount.account.email.apply(s => `serviceAccount:${s}`),
           role: 'roles/storage.objectAdmin',
         },
         { parent: this },
@@ -127,7 +129,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
       value: keys[i].result,
     }));
 
-    this.cloudRunService = new gcp.cloudrun.Service(
+    this.service = new gcp.cloudrun.Service(
       name,
       {
         name,
@@ -143,6 +145,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
           },
           spec: {
             containerConcurrency: 80, // TODO: Make configurable.
+            serviceAccountName: this.serviceAccount.account.email,
             containers: [
               {
                 image: config.image,
@@ -193,7 +196,7 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
     this.cloudRunIamMember = new gcp.cloudrun.IamMember(
       name,
       {
-        service: this.cloudRunService.name,
+        service: this.service.name,
         location: config.location,
         role: 'roles/run.invoker',
         member: 'allUsers',
