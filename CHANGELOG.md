@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/cobraz/pulumi-wordpress/compare/v2.0.1...v2.0.2) (2021-01-21)
+
+
+### Bug Fixes
+
+* Add parent relationship to ApiServices ([a2398aa](https://github.com/cobraz/pulumi-wordpress/commit/a2398aa331a9acf05ee671077a72fc42045fde50))
+* Improve name escaping ([1064b61](https://github.com/cobraz/pulumi-wordpress/commit/1064b612d7c0f4a8ae00e52b59c723428994b644))
+
 ## [2.0.1](https://github.com/cobraz/pulumi-wordpress/compare/v2.0.0...v2.0.1) (2021-01-21)
 
 
