@@ -45,7 +45,7 @@ const envPrefix: Record<WordpressArgs['preset'], string> = {
 export class Wordpress extends pulumi.ComponentResource {
   readonly apiServices: ApiServices;
   readonly gcrDocker: GCRDocker;
-  
+
   readonly service: CloudRun;
   readonly database: MySQLComponent;
 
@@ -65,7 +65,7 @@ export class Wordpress extends pulumi.ComponentResource {
       preset = 'bedrock',
     } = args;
 
-    this.apiServices = new ApiServices(name, {});
+    this.apiServices = new ApiServices(name, {}, { parent: this });
 
     this.gcrDocker = new GCRDocker(
       name,
