@@ -99,7 +99,7 @@ export class Wordpress extends pulumi.ComponentResource {
         envs: [
           {
             name: 'WP_HOME',
-            value: pulumi.interpolate`https:/${domain}/`,
+            value: pulumi.interpolate`https://${domain}/`,
           },
           {
             name: 'WP_SITEURL',
