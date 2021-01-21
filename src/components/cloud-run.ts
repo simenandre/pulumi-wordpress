@@ -91,7 +91,7 @@ export class CloudRun extends pulumi.ComponentResource {
     this.serviceAccount = new ServiceAccount(
       name,
       {
-        accountId: escapeName(name),
+        accountId: escapeName(`sa-${name}`),
         roles: ['roles/cloudsql.client'],
       },
       { parent: this },

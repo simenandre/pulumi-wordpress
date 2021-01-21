@@ -66,7 +66,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
     this.instance = new gcp.sql.DatabaseInstance(
       name,
       {
-        name: escapeName(name),
+        name: escapeName(`${name}-instance`),
         databaseVersion: args.databaseVersion,
         deletionProtection: false,
         settings: {
@@ -86,7 +86,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
     this.database = new gcp.sql.Database(
       name,
       {
-        name: escapeName(name, 5, 16),
+        name: escapeName(`${name}-database`, 5, 16),
         instance: this.instance.name,
       },
       { parent: this },
@@ -96,7 +96,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
       name,
       {
         instance: this.instance.name,
-        name: escapeName(name, 5, 16),
+        name: escapeName(`${name}-user`, 5, 16),
       },
       { parent: this },
     );

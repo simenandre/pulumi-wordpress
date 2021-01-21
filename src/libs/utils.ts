@@ -10,7 +10,7 @@ export function invariant(condition: any, message?: string): asserts condition {
 export function escapeName(name: string, minLen = 8, maxLen = 28): Output<string> {
   name = name.replace(/[^\w\*]/g, '').toLowerCase();
   if (name.length < minLen) {
-    const missingLen = name.length - minLen - 1;
+    const missingLen = maxLen - name.length - 1;
     invariant(missingLen > 0, 'Expect length to be higher than zero');
     const rand = new random.RandomString(name, {
       length: missingLen,
