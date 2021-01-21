@@ -1,5 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
+import { escapeName } from '../libs/utils';
 
 export interface MySQLConfig {
   /**
@@ -65,6 +66,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
     this.instance = new gcp.sql.DatabaseInstance(
       name,
       {
+        name: escapeName(name),
         databaseVersion: args.databaseVersion,
         deletionProtection: false,
         settings: {
@@ -84,6 +86,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
     this.database = new gcp.sql.Database(
       name,
       {
+        name: escapeName(name, 5, 16),
         instance: this.instance.name,
       },
       { parent: this },
@@ -93,6 +96,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
       name,
       {
         instance: this.instance.name,
+        name: escapeName(name, 5, 16),
       },
       { parent: this },
     );

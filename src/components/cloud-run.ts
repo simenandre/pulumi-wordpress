@@ -1,5 +1,4 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as random from '@pulumi/random';
 import * as gcp from '@pulumi/gcp';
 import { ServiceAccount } from './service-account';
 import { DatabaseSettings } from './sql';
@@ -51,8 +50,9 @@ export interface CloudRunConfig {
   readonly containerConcurrency?: pulumi.Input<number>;
 }
 
-export class CloudRunWordpress extends pulumi.ComponentResource {
+export class CloudRun extends pulumi.ComponentResource {
   readonly service: gcp.cloudrun.Service;
+  readonly domainMapping: gcp.cloudrun.DomainMapping;
   readonly cloudRunIamMember: gcp.cloudrun.IamMember;
   readonly storageBucket: gcp.storage.Bucket;
   readonly storageBucketIamMember: gcp.storage.BucketIAMMember[];
@@ -126,14 +126,17 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
     };
 
     if (databaseSettings) {
-      annotations['run.googleapis.com/cloudsql-instances'] = databaseSettings.connectionName;
+      annotations['run.googleapis.com/cloudsql-instances'] =
+        databaseSettings.connectionName;
       envs.push({
         name: 'CLOUDSQL_INSTANCE',
         value: databaseSettings.connectionName,
       });
-      envs.push(...createEnvironmentVariables({
-        instance: databaseSettings,
-      }));
+      envs.push(
+        ...createEnvironmentVariables({
+          instance: databaseSettings,
+        }),
+      );
     }
 
     this.service = new gcp.cloudrun.Service(
@@ -168,6 +171,21 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
             ],
           },
         },
+      },
+      { parent: this },
+    );
+
+    const project = gcp.organizations.getProject(undefined, { parent: this });
+
+    this.domainMapping = new gcp.cloudrun.DomainMapping(
+      name,
+      {
+        location: config.location,
+        metadata: {
+          namespace: project.then(p => p.name),
+        },
+        name: '',
+        spec: { routeName: this.service.name },
       },
       { parent: this },
     );
