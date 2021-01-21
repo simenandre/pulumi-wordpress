@@ -1,12 +1,14 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as random from '@pulumi/random';
 import * as gcp from '@pulumi/gcp';
-import { MySQLComponent } from './sql';
 import { ServiceAccount } from './service-account';
+import { DatabaseSettings } from './sql';
+import { createEnvironmentVariables } from '../libs/env-vars';
+import { escapeName } from '../libs/utils';
 
-export interface CloudRunWordpressConfig {
+export interface CloudRunConfig {
   /**
-   * Wordpress image
+   * image
    */
   readonly image: pulumi.Input<string>;
 
@@ -16,40 +18,41 @@ export interface CloudRunWordpressConfig {
   readonly location: pulumi.Input<string>;
 
   /**
-   * Storage in GB for database.
-   * @default 10
-   */
-  readonly databaseDiskSize?: pulumi.Input<number>;
-
-  /**
-   * For Bedrock
-   * Domain environment
-   */
-  readonly wpHome?: pulumi.Input<string>;
-
-  /**
-   * For Bedrock
-   * Domain environment
-   */
-  readonly wpSiteUrl?: pulumi.Input<string>;
-
-  /**
    * Extra environment variables
    */
   readonly envs?: pulumi.Input<gcp.types.input.cloudrun.ServiceTemplateSpecContainerEnv>[];
-}
 
-const escapeName = (name: string) => {
-  name = name.replace(/[^\w\*]/g, '').toLowerCase();
-  if (name.length < 8) {
-    name = `${name}wordpress`;
-  }
-  return name.substring(0, 28);
-};
+  /**
+   * SQL Database Settings
+   * Adding this will activate Cloud SQL and environment variables.
+   */
+  readonly databaseSettings?: DatabaseSettings;
+
+  /**
+   * Maximum Scaling
+   */
+  readonly maxScale?: pulumi.Input<number>;
+
+  /**
+   * Minimum Scaling (beta)
+   */
+  readonly minScale?: pulumi.Input<number>;
+
+  /**
+   * Environment variable prefix
+   * E.g. if you set `HELLO_`, DB_HOST becomes HELLO_DB_HOST.
+   */
+  readonly dbEnvironmentPrefix?: pulumi.Input<string>;
+
+  /**
+   * Container Concurrency
+   * @default 80
+   */
+  readonly containerConcurrency?: pulumi.Input<number>;
+}
 
 export class CloudRunWordpress extends pulumi.ComponentResource {
   readonly service: gcp.cloudrun.Service;
-  readonly database: MySQLComponent;
   readonly cloudRunIamMember: gcp.cloudrun.IamMember;
   readonly storageBucket: gcp.storage.Bucket;
   readonly storageBucketIamMember: gcp.storage.BucketIAMMember[];
@@ -57,18 +60,19 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
 
   constructor(
     name: string,
-    args: CloudRunWordpressConfig,
+    args: CloudRunConfig,
     opts: pulumi.ComponentResourceOptions = {},
   ) {
     super('wordpress:cloudrun', name, {}, opts);
 
-    let { envs, ...config }: CloudRunWordpressConfig = {
-      databaseDiskSize: 10,
-      envs: [],
-      ...args,
-    };
-
-    this.database = new MySQLComponent(name, {}, { parent: this });
+    let {
+      envs = [],
+      databaseSettings,
+      containerConcurrency = 80,
+      maxScale = 5,
+      minScale = 0,
+      ...config
+    } = args;
 
     this.storageBucket = new gcp.storage.Bucket(
       name,
@@ -107,78 +111,29 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
         `${name}-service`,
         {
           bucket: this.storageBucket.name,
-          member: this.serviceAccount.account.email.apply(s => `serviceAccount:${s}`),
+          member: this.serviceAccount.account.email.apply(
+            s => `serviceAccount:${s}`,
+          ),
           role: 'roles/storage.objectAdmin',
         },
         { parent: this },
       ),
     ];
 
-    const keysTypes = [
-      'AUTH_KEY',
-      'SECURE_AUTH_KEY',
-      'LOGGED_IN_KEY',
-      'NONCE_KEY',
-      'AUTH_SALT',
-      'SECURE_AUTH_SALT',
-      'LOGGED_IN_SALT',
-      'NONCE_SALT',
-    ];
+    const annotations = {
+      'autoscaling.knative.dev/maxScale': String(maxScale),
+      'autoscaling.knative.dev/minScale': String(minScale),
+    };
 
-    const keys = keysTypes.map(
-      k =>
-        new random.RandomPassword(k, {
-          length: 65,
-        }),
-    );
-
-    const keyEnvs = (prefix: string) =>
-      keysTypes.map((k, i) => ({
-        name: `${prefix}${k}`,
-        value: keys[i].result,
+    if (databaseSettings) {
+      annotations['run.googleapis.com/cloudsql-instances'] = databaseSettings.connectionName;
+      envs.push({
+        name: 'CLOUDSQL_INSTANCE',
+        value: databaseSettings.connectionName,
+      });
+      envs.push(...createEnvironmentVariables({
+        instance: databaseSettings,
       }));
-
-    const authEnvs = (prefix: string) => [
-      {
-        name: `${prefix}DB_HOST`,
-        value: pulumi.interpolate`localhost:/cloudsql/${this.database.instance.connectionName}`,
-      },
-      {
-        name: `${prefix}DB_NAME`,
-        value: this.database.database.name,
-      },
-      {
-        name: `${prefix}DB_USER`,
-        value: this.database.user.name,
-      },
-      {
-        name: `${prefix}DB_PASSWORD`,
-        value: this.database.user.password,
-      },
-    ];
-
-    envs = [
-      // For vanilla Wordpress
-      ...keyEnvs('WORDPRESS_'),
-      ...authEnvs('WORDPRESS_'),
-      // For Bedrock Wordpress
-      ...keyEnvs(''),
-      ...authEnvs(''),
-      // For vanilla Wordpress
-      ...envs,
-    ];
-
-    if (config.wpHome) {
-      envs.push({
-        name: 'WP_HOME',
-        value: config.wpHome,
-      });
-    }
-    if (config.wpSiteUrl) {
-      envs.push({
-        name: 'WP_SITEURL',
-        value: config.wpSiteUrl,
-      });
     }
 
     this.service = new gcp.cloudrun.Service(
@@ -189,14 +144,10 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
         location: config.location,
         template: {
           metadata: {
-            annotations: {
-              'autoscaling.knative.dev/maxScale': '5',
-              'run.googleapis.com/cloudsql-instances': this.database.instance
-                .connectionName,
-            },
+            annotations,
           },
           spec: {
-            containerConcurrency: 80, // TODO: Make configurable.
+            containerConcurrency,
             serviceAccountName: this.serviceAccount.account.email,
             containers: [
               {
@@ -206,13 +157,10 @@ export class CloudRunWordpress extends pulumi.ComponentResource {
                     name: 'STORAGE_BUCKET',
                     value: this.storageBucket.name,
                   },
+                  // TODO: Service account should be moved
                   {
                     name: 'GCP_SERVICE_ACCOUNT',
                     value: this.serviceAccount.key.privateKey,
-                  },
-                  {
-                    name: 'CLOUDSQL_INSTANCE',
-                    value: this.database.instance.connectionName,
                   },
                   ...envs,
                 ],

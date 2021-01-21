@@ -14,7 +14,7 @@ export interface WordpressArgs {
   /**
    * Activate backups (automated database backups)
    */
-  readonly activateBackups?: boolean;
+  readonly enableBackups?: boolean;
   /**
    * Size of project
    * Used for setting up sensible defaults
@@ -46,7 +46,12 @@ export class Wordpress extends pulumi.ComponentResource {
   ) {
     super('wordpress', name, args, opts);
 
-    const { build = '../site', location, databaseDiskSize } = args;
+    const {
+      build = '../site',
+      location,
+      databaseDiskSize,
+      enableBackups,
+    } = args;
 
     this.apiServices = new ApiServices(name, {});
 
@@ -62,6 +67,7 @@ export class Wordpress extends pulumi.ComponentResource {
       image: this.gcrDocker.image.imageName,
       location,
       databaseDiskSize,
+      enableBackups,
     });
   }
 }
