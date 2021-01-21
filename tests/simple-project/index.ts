@@ -6,15 +6,12 @@ const provider = new gcp.Provider('gcp', {
   zone: 'europe-west3-a',
 });
 
-export const build = new pw.GCRDocker('test', {
-  build: '.'
-}, { provider });
-
-new pw.CloudRunWordpress(
+new pw.Wordpress(
   'test',
   {
-    image: build.image.imageName,
+    build: '.',
     location: 'europe-west3',
+    domain: 'winning.cobraz.no',
   },
   { provider },
 );

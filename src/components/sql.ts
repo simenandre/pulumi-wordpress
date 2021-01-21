@@ -1,5 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
+import { escapeName } from '../libs/utils';
 
 export interface MySQLConfig {
   /**
@@ -15,17 +16,17 @@ export interface MySQLConfig {
   /**
    * Configuration to increase storage size automatically.  Note that future `pulumi apply` calls will attempt to resize the disk to the value specified in `diskSize` - if this is set, do not set `diskSize`.
    */
-  diskAutoresize?: pulumi.Input<boolean>;
+  readonly diskAutoresize?: pulumi.Input<boolean>;
 
   /**
    * The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.
    */
-  diskSize?: pulumi.Input<number>;
+  readonly diskSize?: pulumi.Input<number>;
 
   /**
    * Enable automatic backups
    */
-  enableBackups?: pulumi.Input<boolean>;
+  readonly enableBackups?: pulumi.Input<boolean>;
 
   /**
    * The availability type of the Cloud SQL
@@ -33,14 +34,21 @@ export interface MySQLConfig {
    * instances, ensure that `settings.backup_configuration.enabled` and
    * `settings.backup_configuration.binary_log_enabled` are both set to `true`.
    */
-  availabilityType?: pulumi.Input<string>;
+  readonly availabilityType?: pulumi.Input<string>;
 
   /**
    * The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
    * for more details and supported versions. Postgres supports only shared-core machine types such as `db-f1-micro`,
    * and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
    */
-  tier?: pulumi.Input<string>;
+  readonly tier?: pulumi.Input<string>;
+}
+
+export interface DatabaseSettings {
+  connectionName: pulumi.Input<string>;
+  databaseName: pulumi.Input<string>;
+  databaseUsername: pulumi.Input<string>;
+  databasePassword: pulumi.Input<string>;
 }
 
 export class MySQLComponent extends pulumi.ComponentResource {
@@ -58,6 +66,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
     this.instance = new gcp.sql.DatabaseInstance(
       name,
       {
+        name: escapeName(name),
         databaseVersion: args.databaseVersion,
         deletionProtection: false,
         settings: {
@@ -77,6 +86,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
     this.database = new gcp.sql.Database(
       name,
       {
+        name: escapeName(name, 5, 16),
         instance: this.instance.name,
       },
       { parent: this },
@@ -86,6 +96,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
       name,
       {
         instance: this.instance.name,
+        name: escapeName(name, 5, 16),
       },
       { parent: this },
     );
