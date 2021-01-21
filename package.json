@@ -1,6 +1,6 @@
 {
   "name": "pulumi-wordpress",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "WordPress on Google Cloud with Magic",
   "main": "dist/index.js",
   "repository": "git@github.com:cobraz/pulumi-wordpress.git",
