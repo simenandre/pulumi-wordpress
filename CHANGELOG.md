@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.1](https://github.com/cobraz/pulumi-wordpress/compare/v2.1.0...v2.1.1) (2021-01-22)
+
+
+### Bug Fixes
+
+* namespace to projectId ([087a864](https://github.com/cobraz/pulumi-wordpress/commit/087a8642d0c29564076c663a882a6b26654636e7))
+
 # [2.1.0](https://github.com/cobraz/pulumi-wordpress/compare/v2.0.2...v2.1.0) (2021-01-22)
 
 
