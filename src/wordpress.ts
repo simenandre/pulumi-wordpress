@@ -72,7 +72,7 @@ export class Wordpress extends pulumi.ComponentResource {
       {
         build,
       },
-      { parent: this, dependsOn: this.apiServices },
+      { parent: this, dependsOn: this.apiServices.services },
     );
 
     this.database = new MySQLComponent(
@@ -81,7 +81,7 @@ export class Wordpress extends pulumi.ComponentResource {
         enableBackups,
         diskSize: databaseDiskSize,
       },
-      { parent: this, dependsOn: this.apiServices },
+      { parent: this, dependsOn: this.apiServices.services },
     );
 
     this.service = new CloudRun(
@@ -108,7 +108,7 @@ export class Wordpress extends pulumi.ComponentResource {
           },
         ],
       },
-      { parent: this, dependsOn: this.apiServices },
+      { parent: this, dependsOn: this.apiServices.services },
     );
   }
 }
