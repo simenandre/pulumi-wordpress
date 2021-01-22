@@ -181,15 +181,15 @@ export class CloudRun extends pulumi.ComponentResource {
       { parent: this },
     );
 
-    const project = gcp.organizations.getProject(undefined, { parent: this });
-
     if (domain) {
+      const project = gcp.organizations.getProject(undefined, { parent: this });
+
       this.domainMapping = new gcp.cloudrun.DomainMapping(
         name,
         {
           location: config.location,
           metadata: {
-            namespace: project.then(p => p.name),
+            namespace: project.then(p => p.projectId),
           },
           name: domain,
           spec: { routeName: this.service.name },
