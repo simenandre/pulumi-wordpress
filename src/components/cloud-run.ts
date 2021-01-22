@@ -2,7 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import { ServiceAccount } from './service-account';
 import { DatabaseSettings } from './sql';
-import { createEnvironmentVariables } from '../libs/env-vars';
+import { WordpressEnvironmentVariables } from './env-vars';
 import { escapeName } from '../libs/utils';
 
 export interface CloudRunConfig {
@@ -138,10 +138,13 @@ export class CloudRun extends pulumi.ComponentResource {
         name: 'CLOUDSQL_INSTANCE',
         value: databaseSettings.connectionName,
       });
+
+      const wpEnvs = new WordpressEnvironmentVariables(name, {
+        instance: databaseSettings,
+      });
+
       envs.push(
-        ...createEnvironmentVariables({
-          instance: databaseSettings,
-        }),
+        ...wpEnvs.envs,
       );
     }
 
