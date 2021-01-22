@@ -89,6 +89,7 @@ export class Wordpress extends pulumi.ComponentResource {
       {
         image: this.gcrDocker.image.imageName,
         location,
+        domain,
         dbEnvironmentPrefix: envPrefix[preset],
         databaseSettings: {
           connectionName: this.database.database.instance,

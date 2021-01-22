@@ -12,6 +12,11 @@ export interface CloudRunConfig {
   readonly image: pulumi.Input<string>;
 
   /**
+   * domain
+   */
+  readonly domain?: pulumi.Input<string>;
+
+  /**
    * The location of the cloud run instance. eg us-central1
    */
   readonly location: pulumi.Input<string>;
@@ -71,6 +76,7 @@ export class CloudRun extends pulumi.ComponentResource {
       containerConcurrency = 80,
       maxScale = 5,
       minScale = 0,
+      domain,
       ...config
     } = args;
 
@@ -177,18 +183,20 @@ export class CloudRun extends pulumi.ComponentResource {
 
     const project = gcp.organizations.getProject(undefined, { parent: this });
 
-    this.domainMapping = new gcp.cloudrun.DomainMapping(
-      name,
-      {
-        location: config.location,
-        metadata: {
-          namespace: project.then(p => p.name),
+    if (domain) {
+      this.domainMapping = new gcp.cloudrun.DomainMapping(
+        name,
+        {
+          location: config.location,
+          metadata: {
+            namespace: project.then(p => p.name),
+          },
+          name: domain,
+          spec: { routeName: this.service.name },
         },
-        name: '',
-        spec: { routeName: this.service.name },
-      },
-      { parent: this },
-    );
+        { parent: this },
+      );
+    }
 
     this.cloudRunIamMember = new gcp.cloudrun.IamMember(
       name,
