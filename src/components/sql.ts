@@ -1,6 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import { escapeName } from '../libs/utils';
+import { RandomPassword } from '@pulumi/random';
 
 export interface MySQLConfig {
   /**
@@ -55,6 +56,7 @@ export class MySQLComponent extends pulumi.ComponentResource {
   readonly instance: gcp.sql.DatabaseInstance;
   readonly database: gcp.sql.Database;
   readonly user: gcp.sql.User;
+  readonly password: pulumi.Output<string>;
 
   constructor(
     name: string,
@@ -92,11 +94,19 @@ export class MySQLComponent extends pulumi.ComponentResource {
       { parent: this },
     );
 
+    const password = new RandomPassword(name, {
+      length: 20,
+    }, { parent: this });
+
+    this.password = password.result;
+
     this.user = new gcp.sql.User(
       name,
       {
         instance: this.instance.name,
         name: escapeName(`${name}-user`, 5, 16),
+        host: '%',
+        password: this.password,
       },
       { parent: this },
     );

@@ -92,7 +92,7 @@ export class Wordpress extends pulumi.ComponentResource {
         domain,
         dbEnvironmentPrefix: envPrefix[preset],
         databaseSettings: {
-          connectionName: this.database.database.instance,
+          connectionName: this.database.instance.connectionName,
           databaseName: this.database.database.name,
           databaseUsername: this.database.user.name,
           databasePassword: this.database.user.password,

@@ -31,7 +31,7 @@ export function createEnvironmentVariables(config: CreateEnvVarsProps) {
   return [
     {
       name: `${prefix}DB_HOST`,
-      value: pulumi.interpolate`localhost:/cloudsql/${instance.connectionName}`,
+      value: pulumi.interpolate`:/cloudsql/${instance.connectionName}`,
     },
     {
       name: `${prefix}DB_NAME`,
