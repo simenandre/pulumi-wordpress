@@ -73,7 +73,7 @@ export class CloudRun extends pulumi.ComponentResource {
     let {
       envs = [],
       databaseSettings,
-      containerConcurrency = 80,
+      containerConcurrency = 20,
       maxScale = 5,
       minScale = 0,
       domain,
