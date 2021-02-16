@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.2](https://github.com/cobraz/pulumi-wordpress/compare/v2.1.1...v2.1.2) (2021-02-16)
+
+
+### Bug Fixes
+
+* Database connection issues ([dd28fcb](https://github.com/cobraz/pulumi-wordpress/commit/dd28fcb0f0d3d5f32605b153e293e1deadeac24c))
+* Lower container concurrency ([fcdb5f4](https://github.com/cobraz/pulumi-wordpress/commit/fcdb5f4b52cf46d3bcb657e88b60d01c867973e9))
+
 ## [2.1.1](https://github.com/cobraz/pulumi-wordpress/compare/v2.1.0...v2.1.1) (2021-01-22)
 
 
