@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.0](https://www.github.com/cobraz/pulumi-wordpress/compare/v2.1.2...v2.2.0) (2021-04-15)
+
+
+### Features
+
+* Protected bucket ([#14](https://www.github.com/cobraz/pulumi-wordpress/issues/14)) ([0eed387](https://www.github.com/cobraz/pulumi-wordpress/commit/0eed3872a959a6db703a0f2078a84228ccbd3020))
+
+
+### Bug Fixes
+
+* Make components dependant on API Services ([#12](https://www.github.com/cobraz/pulumi-wordpress/issues/12)) ([58635cb](https://www.github.com/cobraz/pulumi-wordpress/commit/58635cb0b24986178f750a4cedb2749e1201945d))
+* Set memory to 1G ([c259ad6](https://www.github.com/cobraz/pulumi-wordpress/commit/c259ad69ca636e5a42e54b0bb483fc520d889cfc))
+
 ## [2.1.2](https://github.com/cobraz/pulumi-wordpress/compare/v2.1.1...v2.1.2) (2021-02-16)
 
 
