@@ -161,6 +161,11 @@ export class CloudRun extends pulumi.ComponentResource {
             containers: [
               {
                 image: config.image,
+                resources: {
+                  limits: {
+                    memory: '1G',
+                  },
+                },
                 envs: [
                   {
                     name: 'STORAGE_BUCKET',
