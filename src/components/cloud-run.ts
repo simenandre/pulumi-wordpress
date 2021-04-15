@@ -91,7 +91,7 @@ export class CloudRun extends pulumi.ComponentResource {
           },
         ],
       },
-      { parent: this },
+      { parent: this, protect: true },
     );
 
     this.serviceAccount = new ServiceAccount(
