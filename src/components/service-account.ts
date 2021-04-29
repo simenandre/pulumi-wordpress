@@ -10,6 +10,7 @@ export interface ServiceAccountArgs {
    */
   accountId: pulumi.Input<string>;
   /**
+   * Project IAM Members
    * The role that should be applied. Note that custom roles must be of the format
    * `[projects|organizations]/{parent-name}/roles/{role-name}`.
    */
