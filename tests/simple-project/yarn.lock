@@ -104,6 +104,13 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
+"@pulumi/random@^3.0.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/random/-/random-3.2.0.tgz#aad98835bc593e8f5ef95e5d6f274471b6732265"
+  integrity sha512-mfXyzCkjHvcCpKtzmlmzLnfBOsl1mbBlek08HHp2PYaG1z0pnJQXE+6F7lU23F/xqFlzCcxPZMiBc/OarQvdXA==
+  dependencies:
+    "@pulumi/pulumi" "^2.15.0"
+
 "@types/body-parser@*":
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.0.tgz#0685b3c47eb3006ffed117cdd55164b61f80538f"
@@ -340,9 +347,9 @@ has@^1.0.3:
     function-bind "^1.1.1"
 
 hosted-git-info@^2.1.4:
-  version "2.8.8"
-  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.8.tgz#7539bd4bc1e0e0a895815a2e0262420b12858488"
-  integrity sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
+  version "2.8.9"
+  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
+  integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -516,10 +523,12 @@ protobufjs@^6.8.6:
     long "^4.0.0"
 
 "pulumi-wordpress@file:../..":
-  version "0.0.0"
+  version "2.2.0"
   dependencies:
+    "@pulumi/docker" "^2.5.0"
     "@pulumi/gcp" "^4.6.0"
     "@pulumi/pulumi" "^2.16.2"
+    "@pulumi/random" "^3.0.0"
     tslib "^2.0.3"
 
 read-package-json@^2.0.0, read-package-json@^2.0.13:
