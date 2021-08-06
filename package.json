@@ -2,10 +2,10 @@
   "name": "pulumi-wordpress",
   "version": "2.2.0",
   "description": "WordPress on Google Cloud with Magic",
-  "main": "dist/index.js",
-  "repository": "git@github.com:cobraz/pulumi-wordpress.git",
-  "author": "Simen A. W. Olsen <cobraz@cobraz.no>",
+  "repository": "github:cobraz/pulumi-wordpress",
   "license": "Apache-2.0",
+  "author": "Simen A. W. Olsen <cobraz@cobraz.no>",
+  "main": "dist/index.js",
   "scripts": {
     "test": "PULUMI_TEST_MODE=true PULUMI_NODEJS_STACK=test-ws PULUMI_NODEJS_PROJECT=dev jest --coverage src",
     "build": "tsc",
